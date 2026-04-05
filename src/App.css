@@ -1,5 +1,16 @@
 :root {
-  color-scheme: light only;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: light;
+  }
+  
+  html, body {
+    background-color: white;
+    color: #2a2a2a;
+  }
 }
 .app {
   display: flex;
