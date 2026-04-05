@@ -1,7 +1,11 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback
+} from 'react';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
 import './App.css';
 import SplashScreen from './components/SplashScreen.jsx';
@@ -53,8 +57,10 @@ function HomePage() {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(detectSection);
     };
+
     window.addEventListener('scroll', onScroll, { passive: true });
     requestAnimationFrame(detectSection);
+
     return () => {
       window.removeEventListener('scroll', onScroll);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -70,6 +76,7 @@ function HomePage() {
       <ProjectSection />
       <TestimonialSection />
       <ContactSection />
+
       <footer className="site-footer">
         <p>© 2026 Panchali Gunasena · Designed & Built with ♥</p>
       </footer>
@@ -95,16 +102,23 @@ export default function App() {
     init();
   }, []);
 
+useEffect(() => {
+  document.documentElement.setAttribute("data-theme", "light");
+  document.documentElement.style.colorScheme = "light";
+
+  document.body.style.background = "#FBFBFB";
+  document.body.style.color = "#282828";
+}, []);
   const handleSplashComplete = useCallback(() => {
     setSplashDone(true);
   }, []);
 
   return (
-    
     <>
       {(!splashDone || !firebaseReady) && (
         <SplashScreen onComplete={handleSplashComplete} />
       )}
+
       {splashDone && firebaseReady && (
         <Router>
           <Routes>

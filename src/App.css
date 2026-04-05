@@ -1,17 +1,25 @@
 :root {
   color-scheme: light;
+  --bg-color: #ffffff;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: light;
-  }
-  
-  html, body {
-    background-color: white;
-    color: #2a2a2a;
-  }
+html, body {
+  background-color: var(--bg-color);
+  color: #2a2a2a;
+  font-family: 'Poppins';
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
+
+body {
+  font-weight: 400;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+}
+
 .app {
   display: flex;
   flex-direction: column;
@@ -43,21 +51,6 @@
   z-index: 30;
   background: var(--bg-color);
   isolation: isolate;
-}
-
-html, body {
-  font-family: 'Poppins';
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-weight: 400;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
 }
 
 @media (max-width: 480px) {
