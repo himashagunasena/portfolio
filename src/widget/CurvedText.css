@@ -1,0 +1,58 @@
+.curved-text-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
+  padding: 0;
+  line-height: 0;
+}
+
+.curved-text-svg {
+  width: 100%;
+  max-width: 860px;
+  height: auto;
+  display: block;
+  overflow: visible;
+  margin-bottom: -18%;
+  margin-top: 8%;
+}
+
+.curved-text {
+  font-family: 'Bungee', sans-serif;
+  font-size: 40px;
+  fill: var(--text-dark);
+  font-weight: 900;
+}
+
+@media (max-width: 780px) {
+  .curved-text-svg {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+    margin-bottom: -10%;
+    margin-top: 6%;
+  }
+
+  .curved-text {
+    font-size: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  .curved-text {
+    font-size: 78px;
+  }
+   .curved-text-svg {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+    margin-bottom: 0%;
+    margin-top: 10%;
+  }
+
+}
+

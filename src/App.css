@@ -1,0 +1,53 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-color);
+}
+
+.app > section,
+.app > footer {
+  position: relative;
+  z-index: 0;
+  flex-shrink: 0;
+}
+
+.app > footer {
+  justify-content: center;
+  padding: 20px 20px 40px;
+  text-align: center;
+  font-size: 14px;
+}
+
+#experience,
+#skills,
+#portfolio,
+#review,
+#contact,
+.site-footer {
+  overflow: hidden;
+  position: relative;
+  z-index: 30;
+  background: var(--bg-color);
+  isolation: isolate;
+}
+
+html, body {
+  font-family: 'Poppins';
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-weight: 400;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .app > footer {
+    font-size: 12px;
+  }
+}
