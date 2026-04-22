@@ -14,3 +14,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+export const loadFirebase = async () => {
+  return new Promise(resolve => setTimeout(resolve, 2000));
+};

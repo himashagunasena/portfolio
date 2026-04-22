@@ -1,6 +1,4 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
-import { db } from '../firebase';
 import './ExperienceSection.css';
 import grassBg from '../assets/grass_background.jpg';
 import Lottie from "lottie-react";
@@ -10,8 +8,8 @@ function useVisible(ref) {
   const [vis, setVis] = useState(false);
 
   useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) setVis(true);
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) setVis(true);
     }, { threshold: 0.1 });
 
     if (ref.current) obs.observe(ref.current);
@@ -21,45 +19,13 @@ function useVisible(ref) {
   return vis;
 }
 
-export default function ExperienceSection() {
+export default function ExperienceSection({ initialData }) {
   const ref = useRef(null);
   const vis = useVisible(ref);
 
-  const [experiences, setExperiences] = useState([]);
-  const [education, setEducation] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const expQuery = query(
-          collection(db, "experience"),
-          where("type", "==", "experience"),
-          orderBy("period", "desc")
-        );
-
-        const eduQuery = query(
-          collection(db, "experience"),
-          where("type", "==", "education"),
-          orderBy("period", "desc")
-        );
-
-        const [expSnapshot, eduSnapshot] = await Promise.all([
-          getDocs(expQuery),
-          getDocs(eduQuery)
-        ]);
-
-        setExperiences(expSnapshot.docs.map(doc => doc.data()));
-        setEducation(eduSnapshot.docs.map(doc => doc.data()));
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, []);
+  const [experiences] = useState(initialData.experiences || []);
+  const [education] = useState(initialData.education || []);
+  const [loading] = useState(false);
 
   return (
     <section
@@ -120,11 +86,10 @@ export default function ExperienceSection() {
         <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
           <path
             d="M0,40 C240,120 480,-40 720,40 C960,120 1200,-40 1440,40 L1440,120 L0,120 Z"
-            fill="#FBFBFB"
+            fill="var(--bg-color)"
           />
         </svg>
       </div>
-
     </section>
   );
 }

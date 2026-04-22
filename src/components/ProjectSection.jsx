@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
@@ -6,35 +6,49 @@ import "./ProjectSection.css";
 import Lottie from "lottie-react";
 import loadingAnimation from "../assets/loading.json";
 
-const CATEGORIES = ["All", "Mobile", "Web", "UI/UX", "Illustrations & Digital painting", "Branding Design"];
+const CATEGORIES = [
+  "All",
+  "Mobile",
+  "Web",
+  "UI/UX",
+  "Illustrations & Digital painting",
+  "Branding Design"
+];
 
 const CATEGORY_TYPE_MAP = {
-  "All": null,
-  "Mobile": ["mobile"],
-  "Web": ["web"],
-  "UI/UX": ["ui", "ui/ux", "uiux"],
+  All: null,
+  Mobile: ["mobile"],
+  Web: ["web"],
+  "UI/UX": ["ui", "ui/ux design", "uiux"],
   "Illustrations & Digital painting": ["art", "illustration", "paint", "digital painting"],
-  "Branding Design": ["branding", "brand"],
+  "Branding Design": ["branding", "brand","branding design"],
 };
 
-export default function ProjectSection() {
-  const [projects, setProjects] = useState([]);
+export async function fetchProjectsData() {
+  const querySnapshot = await getDocs(collection(db, "projects"));
+  let data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  data.sort((a, b) => {
+    const getTime = d => (d?.seconds ? d.seconds * 1000 : new Date(d).getTime());
+    return getTime(b.date) - getTime(a.date);
+  });
+  return data;
+}
+
+export default function ProjectSection({ initialData }) {
+  const [projects, setProjects] = useState(initialData || []);
   const [activeCategory, setActiveCategory] = useState("All");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialData);
   const [dialogProject, setDialogProject] = useState(null);
   const [visibleCard, setVisibleCard] = useState(null);
   const navigate = useNavigate();
   const cardRefs = useRef([]);
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    if (initialData) return; // already have data from splash
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        const querySnapshot = await getDocs(collection(db, "projects"));
-        let data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        data.sort((a, b) => {
-          const getTime = (d) => d?.seconds ? d.seconds * 1000 : new Date(d).getTime();
-          return getTime(b.date) - getTime(a.date);
-        });
+        const data = await fetchProjectsData();
         setProjects(data);
       } catch (err) {
         console.error(err);
@@ -42,22 +56,20 @@ export default function ProjectSection() {
         setLoading(false);
       }
     };
-    fetchProjects();
-  }, []);
+    fetchData();
+  }, [initialData]);
 
   const allowedTypes = CATEGORY_TYPE_MAP[activeCategory];
   const filteredAll = !allowedTypes
     ? projects
-    : projects.filter(p =>
-        allowedTypes.includes((p.type || "").toLowerCase().trim())
-      );
+    : projects.filter(p => allowedTypes.includes((p.type || "").toLowerCase().trim()));
 
   const filtered = filteredAll.slice(0, 6);
 
   useEffect(() => {
     if (window.innerWidth > 480) return;
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         let maxRatio = 0;
         let visibleId = null;
         entries.forEach(entry => {
@@ -76,12 +88,14 @@ export default function ProjectSection() {
     return () => observer.disconnect();
   }, [filtered]);
 
-  const handleClick = (p) => {
+  const handleClick = p => {
     const type = (p.type || "").toLowerCase();
     if (["art", "illustration", "paint", "digital painting"].includes(type)) {
       setDialogProject(p);
     } else if (p.link) {
       window.open(p.link, "_blank");
+    } else if(p.link == null && ["branding design"].includes(type)){
+         setDialogProject(p);
     }
   };
 
@@ -117,32 +131,13 @@ export default function ProjectSection() {
               data-id={p.id}
               onClick={() => handleClick(p)}
             >
-              <img
-                src={p.imageURL || "/placeholder.png"}
-                alt={p.title}
-                className="ps-card__img"
-              />
+              <img src={p.imageURL || "/placeholder.png"} alt={p.title} className="ps-card__img" />
               <div
                 className="ps-card__overlay"
                 style={{
-                  opacity:
-                    window.innerWidth > 480
-                      ? undefined
-                      : visibleCard === p.id
-                      ? 1
-                      : 0,
-                  transform:
-                    window.innerWidth > 480
-                      ? undefined
-                      : visibleCard === p.id
-                      ? "translateY(0)"
-                      : "translateY(20px)",
-                  pointerEvents:
-                    window.innerWidth > 480
-                      ? undefined
-                      : visibleCard === p.id
-                      ? "auto"
-                      : "none"
+                  opacity: window.innerWidth > 480 ? undefined : visibleCard === p.id ? 1 : 0,
+                  transform: window.innerWidth > 480 ? undefined : visibleCard === p.id ? "translateY(0)" : "translateY(20px)",
+                  pointerEvents: window.innerWidth > 480 ? undefined : visibleCard === p.id ? "auto" : "none"
                 }}
               >
                 <span className="ps-card__tag">{p.type}</span>
@@ -156,30 +151,23 @@ export default function ProjectSection() {
 
       {filteredAll.length > 6 && (
         <div className="ps-show-more">
-          <button onClick={() => navigate("/projects")}>
-            Show More
-          </button>
+          <button onClick={() => navigate("/projects")}>Show More</button>
         </div>
       )}
 
       {dialogProject && (
         <div className="dialog-overlay" onClick={() => setDialogProject(null)}>
           <div className="dialog-box" onClick={e => e.stopPropagation()}>
-            <button
-              className="dialog-close"
-              onClick={() => setDialogProject(null)}
-            >
-              ✕
-            </button>
+            <button className="dialog-close" onClick={() => setDialogProject(null)}>✕</button>
             <img
-  src={dialogProject.imageURL}
-  alt={dialogProject.title}
-  className="dialog-image"
-  onContextMenu={(e) => {
-    e.preventDefault();
-    alert("Downloading disabled for this image.");
-  }}
-/>
+              src={dialogProject.imageURL}
+              alt={dialogProject.title}
+              className="dialog-image"
+              onContextMenu={e => {
+                e.preventDefault();
+                alert("Downloading disabled for this image.");
+              }}
+            />
             <div className="dialog-content">
               <h3>{dialogProject.title}</h3>
               <p className="dialog-text">{dialogProject.description}</p>

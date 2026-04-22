@@ -1,15 +1,23 @@
 :root {
-  color-scheme: light;
-  --bg-color: #ffffff;
+  color-scheme: light !important;
 }
 
-html, body {
-  background-color: var(--bg-color);
+html, body, #root {
+  background-color: var(--bg-color) !important;
   color: #2a2a2a;
   font-family: 'Poppins';
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+html {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+*{
+  filter: none !important;
+  color-scheme: light !important;
 }
 
 body {
@@ -42,7 +50,6 @@ h1, h2, h3, h4, h5, h6 {
 
 #experience,
 #skills,
-#portfolio,
 #review,
 #contact,
 .site-footer {
@@ -53,8 +60,15 @@ h1, h2, h3, h4, h5, h6 {
   isolation: isolate;
 }
 
+#portfolio {
+  position: relative;
+  z-index: 30;
+  background: var(--bg-color);
+}
+
 @media (max-width: 480px) {
   .app > footer {
     font-size: 12px;
   }
 }
+

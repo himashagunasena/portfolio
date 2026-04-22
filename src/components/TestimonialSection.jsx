@@ -76,6 +76,19 @@ function FeedbackModal({ onClose }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
+  useEffect(() => {
+  async function fetchReviews() {
+    const q = query(
+      collection(db, "testimonials"),
+      where("approve", "==", true),
+      orderBy("createdAt", "desc")
+    );
+    const snap = await getDocs(q);
+    setReviews(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  }
+  fetchReviews();
+}, []);
+
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
   const handleSubmit = async () => {
@@ -113,7 +126,7 @@ function FeedbackModal({ onClose }) {
           <div className="tm-thankyou">
             <h2 className="tm-ty-title">Thank you so much</h2>
             <p className="tm-ty-desc">
-              Your feedback has been successfully submitted to Panchali Gunasena. I truly appreciate your support.
+              Your feedback has been successfully submitted to Panchali Himasha Gunasena. I truly appreciate your support.
             </p>
             <img src={loveCat} alt="Thank you" className="tm-ty-img"/>
           </div>
@@ -141,11 +154,11 @@ function FeedbackModal({ onClose }) {
               className="tm-textarea"
               name="feedback"
               placeholder="Write your feedback here"
-              maxLength={100}
+              maxLength={250}
               value={form.feedback}
               onChange={handleChange}
             />
-            <div className="tm-char-count">{form.feedback.length}/100</div>
+            <div className="tm-char-count">{form.feedback.length}/250</div>
 
             <p className="tm-rating-label">Rating for my services</p>
             <StarRating value={form.rating} onChange={v => setForm(f => ({ ...f, rating: v }))} />

@@ -12,7 +12,7 @@ const CATEGORY_TYPE_MAP = {
   "All": null,
   "Mobile": ["mobile"],
   "Web": ["web"],
-  "UI/UX": ["ui", "ui/ux", "uiux"],
+  "UI/UX": ["ui","ui/ux design", "uiux"],
   "Illustrations & Digital painting": ["art", "illustration", "paint", "digital painting"],
   "Branding Design": ["branding", "brand"],
 };
