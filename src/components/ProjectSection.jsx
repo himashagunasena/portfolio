@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { collection, getDocs } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
@@ -12,35 +13,35 @@ const CATEGORIES = [
   "Web",
   "UI/UX",
   "Illustrations & Digital painting",
-  "Branding Design"
+  "Branding Design",
 ];
 
 const CATEGORY_TYPE_MAP = {
   All: null,
   Mobile: ["mobile"],
   Web: ["web"],
-  "UI/UX": ["ui", "ui/ux design", "uiux"],
-  "Illustrations & Digital painting": [
-    "art",
-    "illustration",
-    "paint",
-    "digital painting"
-  ],
-  "Branding Design": ["branding", "brand", "branding design"]
+  "UI/UX": ["ui", "ui/ux design", "uiux", "ui/ux"],
+  "Illustrations & Digital painting": ["art", "illustration", "paint", "digital painting"],
+  "Branding Design": ["branding", "brand", "branding design"],
 };
 
 export async function fetchProjectsData() {
   const querySnapshot = await getDocs(collection(db, "projects"));
 
-  let data = querySnapshot.docs.map(doc => ({
+  let data = querySnapshot.docs.map((doc) => ({
     id: doc.id,
-    ...doc.data()
+    ...doc.data(),
   }));
 
   data.sort((a, b) => {
-    const getTime = d =>
-      d?.seconds ? d.seconds * 1000 : new Date(d).getTime();
-
+    const getTime = (date) => {
+      if (!date) return 0;
+      if (date?.seconds) {
+        return date.seconds * 1000;
+      }
+      const parsedDate = new Date(date).getTime();
+      return Number.isNaN(parsedDate) ? 0 : parsedDate;
+    };
     return getTime(b.date) - getTime(a.date);
   });
 
@@ -62,12 +63,11 @@ export default function ProjectSection({ initialData }) {
 
     const fetchData = async () => {
       setLoading(true);
-
       try {
         const data = await fetchProjectsData();
         setProjects(data);
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
       } finally {
         setLoading(false);
       }
@@ -76,27 +76,39 @@ export default function ProjectSection({ initialData }) {
     fetchData();
   }, [initialData]);
 
+  useEffect(() => {
+    if (dialogProject) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [dialogProject]);
+
   const allowedTypes = CATEGORY_TYPE_MAP[activeCategory];
 
   const filteredAll = !allowedTypes
     ? projects
-    : projects.filter(p =>
-        allowedTypes.includes(
-          (p.type || "").toLowerCase().trim()
-        )
+    : projects.filter((project) =>
+        allowedTypes.includes((project.type || "").toLowerCase().trim())
       );
 
   const filtered = filteredAll.slice(0, 6);
 
   useEffect(() => {
-    if (window.innerWidth > 480) return;
+    if (window.innerWidth > 480) {
+      setVisibleCard(null);
+      return;
+    }
 
     const observer = new IntersectionObserver(
-      entries => {
+      (entries) => {
         let maxRatio = 0;
         let visibleId = null;
 
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
           if (entry.intersectionRatio > maxRatio) {
             maxRatio = entry.intersectionRatio;
             visibleId = entry.target.getAttribute("data-id");
@@ -107,206 +119,159 @@ export default function ProjectSection({ initialData }) {
           setVisibleCard(visibleId);
         }
       },
-      {
-        threshold: [0.3, 0.5, 0.7, 0.9]
-      }
+      { threshold: [0.3, 0.5, 0.7, 0.9] }
     );
 
-    cardRefs.current.forEach(ref => {
-      if (ref) observer.observe(ref);
+    cardRefs.current.forEach((ref) => {
+      if (ref) {
+        observer.observe(ref);
+      }
     });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, [filtered]);
 
-  // Every project opens the popup
-  const handleClick = project => {
+  const handleClick = (project) => {
     setDialogProject(project);
   };
 
-  // Open project source/link
   const handleViewProject = () => {
     if (!dialogProject?.link) return;
-
-    window.open(
-      dialogProject.link,
-      "_blank",
-      "noopener,noreferrer"
-    );
+    window.open(dialogProject.link, "_blank", "noopener,noreferrer");
   };
 
   const closeDialog = () => {
     setDialogProject(null);
   };
 
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === "Escape" && dialogProject) {
+        closeDialog();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [dialogProject]);
+
+  const isFullHeightImage = [
+    "digital painting",
+    "branding design",
+    "branding",
+    "brand",
+  ].includes((dialogProject?.type || "").toLowerCase().trim());
+
   return (
     <section className="ps-section" id="portfolio">
-
       <div className="title">
         <p>My</p>
         <p className="title-second">Projects</p>
       </div>
 
       <div className="ps-tabs">
-        {CATEGORIES.map(cat => (
+        {CATEGORIES.map((category) => (
           <button
-            key={cat}
-            className={`ps-tab${
-              activeCategory === cat
-                ? " ps-tab--active"
-                : ""
-            }`}
-            onClick={() => setActiveCategory(cat)}
+            key={category}
+            className={`ps-tab ${activeCategory === category ? "ps-tab--active" : ""}`}
+            onClick={() => setActiveCategory(category)}
           >
-            {cat}
+            {category}
           </button>
         ))}
       </div>
 
       {loading ? (
         <div className="ps-loader">
-          <Lottie
-            animationData={loadingAnimation}
-            loop
-          />
+          <Lottie animationData={loadingAnimation} loop />
         </div>
-      ) : (
+      ) : filtered.length > 0 ? (
         <div className="ps-grid">
-          {filtered.map((p, index) => (
+          {filtered.map((project, index) => (
             <div
-              key={p.id}
+              key={project.id}
               className="ps-card"
-              ref={el => {
-                cardRefs.current[index] = el;
+              ref={(element) => {
+                cardRefs.current[index] = element;
               }}
-              data-id={p.id}
-              onClick={() => handleClick(p)}
+              data-id={project.id}
+              onClick={() => handleClick(project)}
             >
               <img
-                src={
-                  p.imageURL ||
-                  "/placeholder.png"
-                }
-                alt={p.title}
+                src={project.imageURL || "/placeholder.png"}
+                alt={project.title || "Project"}
                 className="ps-card__img"
+                draggable="false"
               />
 
               <div
-                className="ps-card__overlay"
-                style={{
-                  opacity:
-                    window.innerWidth > 480
-                      ? undefined
-                      : visibleCard === p.id
-                      ? 1
-                      : 0,
-
-                  transform:
-                    window.innerWidth > 480
-                      ? undefined
-                      : visibleCard === p.id
-                      ? "translateY(0)"
-                      : "translateY(20px)",
-
-                  pointerEvents:
-                    window.innerWidth > 480
-                      ? undefined
-                      : visibleCard === p.id
-                      ? "auto"
-                      : "none"
-                }}
+                className={`ps-card__overlay ${visibleCard === project.id ? "visible" : ""}`}
               >
-                <span className="ps-card__tag">
-                  {p.type}
-                </span>
-
-                <h3 className="ps-card__title">
-                  {p.title}
-                </h3>
-
-                <p className="ps-card__desc">
-                  {p.description}
-                </p>
+                <span className="ps-card__tag">{project.type}</span>
+                <h3 className="ps-card__title">{project.title}</h3>
+                <p className="ps-card__desc">{project.description}</p>
               </div>
             </div>
           ))}
         </div>
+      ) : (
+        <div className="ps-empty">No projects found.</div>
       )}
 
       {filteredAll.length > 6 && (
         <div className="ps-show-more">
-          <button
-            onClick={() => navigate("/projects")}
-          >
-            Show More
-          </button>
+          <button onClick={() => navigate("/projects")}>Show More</button>
         </div>
       )}
 
-      {/* PROJECT POPUP */}
-      {dialogProject && (
-        <div
-          className="dialog-overlay"
-          onClick={closeDialog}
-        >
-          <div
-            className="dialog-box"
-            onClick={e => e.stopPropagation()}
-          >
+      {dialogProject &&
+        createPortal(
+          <div className="dialog-overlay" onClick={closeDialog}>
+            <div className="dialog-box" onClick={(event) => event.stopPropagation()}>
+              <button
+                className="dialog-close"
+                onClick={closeDialog}
+                aria-label="Close project"
+              >
+                ✕
+              </button>
 
-            <button
-              className="dialog-close"
-              onClick={closeDialog}
-              aria-label="Close project"
-            >
-              ✕
-            </button>
+              <img
+                src={dialogProject.imageURL || "/placeholder.png"}
+                alt={dialogProject.title || "Project"}
+                className={`dialog-image ${isFullHeightImage ? "digital-painting-image" : ""}`}
+                draggable="false"
+                onContextMenu={(event) => {
+                  event.preventDefault();
+                  alert("Downloading disabled for this image.");
+                }}
+              />
 
-            <img
-              src={
-                dialogProject.imageURL ||
-                "/placeholder.png"
-              }
-              alt={dialogProject.title}
-              className="dialog-image"
-              onContextMenu={e => {
-                e.preventDefault();
-                alert(
-                  "Downloading disabled for this image."
-                );
-              }}
-            />
+              <div className="dialog-content">
+                <span className="dialog-category">{dialogProject.type}</span>
+                <h3>{dialogProject.title}</h3>
 
-            <div className="dialog-content">
-
-              <span className="dialog-category">
-                {dialogProject.type}
-              </span>
-
-              <h3>
-                {dialogProject.title}
-              </h3>
-
-              <p className="dialog-text">
-                {dialogProject.description}
-              </p>
-
-              {/* VIEW PROJECT BUTTON */}
-              {dialogProject.link && (
-                <button
-                  className="dialog-project-button"
-                  onClick={handleViewProject}
-                >
-                  View Project
-                  <span>↗</span>
-                </button>
-              )}
-
+                <div
+                  className="dialog-text"
+                  dangerouslySetInnerHTML={{
+                    __html: dialogProject.description || "",
+                  }}
+                />
+              </div>
+               {dialogProject.link && (
+                  <button className="dialog-project-button" onClick={handleViewProject}>
+                    View Project
+                    <span>↗</span>
+                  </button>
+                )}
             </div>
-          </div>
-        </div>
-      )}
-
+          </div>,
+          document.body
+        )}
     </section>
   );
 }

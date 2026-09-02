@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 import "../components/ProjectSection.css";
@@ -45,6 +46,27 @@ export default function AllProjects() {
     fetchProjects();
   }, []);
 
+  useEffect(() => {
+    if (dialogProject) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [dialogProject]);
+
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === "Escape" && dialogProject) {
+        setDialogProject(null);
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [dialogProject]);
+
   const allowedTypes = CATEGORY_TYPE_MAP[activeCategory];
   const filtered = projects
     .filter(p => !allowedTypes || allowedTypes.includes((p.type || "").toLowerCase().trim()))
@@ -71,13 +93,22 @@ export default function AllProjects() {
   }, [filtered]);
 
   const handleClick = (p) => {
-    const type = (p.type || "").toLowerCase();
-    if (["art", "illustration", "paint", "digital painting"].includes(type)) {
-      setDialogProject(p);
-    } else if (p.link) {
-      window.open(p.link, "_blank");
-    }
+    setDialogProject(p);
   };
+
+  const handleViewProject = () => {
+    if (!dialogProject?.link) return;
+    window.open(dialogProject.link, "_blank", "noopener,noreferrer");
+  };
+
+  const closeDialog = () => setDialogProject(null);
+
+  const isFullHeightImage = [
+    "digital painting",
+    "branding design",
+    "branding",
+    "brand",
+  ].includes((dialogProject?.type || "").toLowerCase().trim());
 
   return (
     <section className="ps-section ap-section">
@@ -86,7 +117,6 @@ export default function AllProjects() {
         <p>All</p><p className="title-second">Projects</p>
       </div>
 
-      {/* Search bar */}
       <div className="ap-search-wrapper">
         <div className="ap-search-box">
           <svg className="ap-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -105,7 +135,6 @@ export default function AllProjects() {
         </div>
       </div>
 
-      {/* Filter tabs */}
       <div className="ps-tabs">
         {CATEGORIES.map(cat => (
           <button
@@ -156,23 +185,40 @@ export default function AllProjects() {
         </div>
       )}
 
-      {dialogProject && (
-        <div className="dialog-overlay" onClick={() => setDialogProject(null)}>
-          <div className="dialog-box" onClick={e => e.stopPropagation()}>
-            <button className="dialog-close" onClick={() => setDialogProject(null)}>✕</button>
-            <img
-              src={dialogProject.imageURL}
-              alt={dialogProject.title}
-              className="dialog-image"
-              onContextMenu={e => { e.preventDefault(); alert("Downloading disabled for this image."); }}
-            />
-            <div className="dialog-content">
-              <h3>{dialogProject.title}</h3>
-              <p className="dialog-text">{dialogProject.description}</p>
+      {dialogProject &&
+        createPortal(
+          <div className="dialog-overlay" onClick={closeDialog}>
+            <div className="dialog-box" onClick={e => e.stopPropagation()}>
+              <button className="dialog-close" onClick={closeDialog} aria-label="Close project">✕</button>
+
+              <img
+                src={dialogProject.imageURL || "/placeholder.png"}
+                alt={dialogProject.title || "Project"}
+                className={`dialog-image ${isFullHeightImage ? "digital-painting-image" : ""}`}
+                draggable="false"
+                onContextMenu={e => { e.preventDefault(); alert("Downloading disabled for this image."); }}
+              />
+
+              <div className="dialog-content">
+                <span className="dialog-category">{dialogProject.type}</span>
+                <h3>{dialogProject.title}</h3>
+
+                <div
+                  className="dialog-text"
+                  dangerouslySetInnerHTML={{ __html: dialogProject.description || "" }}
+                />
+
+                {dialogProject.link && (
+                  <button className="dialog-project-button" onClick={handleViewProject}>
+                    View Project
+                    <span>↗</span>
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </section>
   );
 }

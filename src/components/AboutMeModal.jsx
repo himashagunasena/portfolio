@@ -1,0 +1,1 @@
+const database = getDatabase(db.app, 'https://portfolio-web-41160-default-rtdb.firebaseio.com/');

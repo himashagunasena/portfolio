@@ -76,19 +76,6 @@ function FeedbackModal({ onClose }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  useEffect(() => {
-  async function fetchReviews() {
-    const q = query(
-      collection(db, "testimonials"),
-      where("approve", "==", true),
-      orderBy("createdAt", "desc")
-    );
-    const snap = await getDocs(q);
-    setReviews(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-  }
-  fetchReviews();
-}, []);
-
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
   const handleSubmit = async () => {

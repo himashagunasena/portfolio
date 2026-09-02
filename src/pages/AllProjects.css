@@ -1,9 +1,12 @@
 .ap-section {
-  max-width: 1200px;
+  max-width: 100%;
   padding-top: 60px;
 }
 
 .ap-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
   justify-content: center;
   margin-bottom: 0;
 }

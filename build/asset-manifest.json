@@ -1,0 +1,30 @@
+{
+  "files": {
+    "main.css": "/static/css/main.6c7e43ad.css",
+    "main.js": "/static/js/main.addf296e.js",
+    "static/media/profile.png": "/static/media/profile.f168b8d402490e205cf7.png",
+    "static/media/leaves_mobile.png": "/static/media/leaves_mobile.0d4df96febb339cd194a.png",
+    "static/media/background_mobile.jpg": "/static/media/background_mobile.69833555fbd200aad69d.jpg",
+    "static/media/rainbow_cat_mobile.png": "/static/media/rainbow_cat_mobile.4608377f8b34503a1d9e.png",
+    "static/media/leaves.png": "/static/media/leaves.02589468871f4c4a29e2.png",
+    "static/media/rainbow_cat.png": "/static/media/rainbow_cat.ed03739ffa131b29e873.png",
+    "static/media/star.png": "/static/media/star.0b2c07dca48d3fa7c46c.png",
+    "static/media/grass_background.jpg": "/static/media/grass_background.747e3bc8d2eeea2b1b9b.jpg",
+    "static/media/cloud.jpg": "/static/media/cloud.1db2a9f5b19ce503bd3c.jpg",
+    "static/media/kitty.png": "/static/media/kitty.f3e9f5fcb9d30c756cd6.png",
+    "static/media/background.jpg": "/static/media/background.4dfecd6efa3da06f4ee2.jpg",
+    "static/media/illustrator_me.png": "/static/media/illustrator_me.b41c34cc47d2a7ad9fd5.png",
+    "static/media/call.png": "/static/media/call.1a7b89dcd13cefbcc2ed.png",
+    "static/media/full_logo.png": "/static/media/full_logo.aba42e789c7147452f31.png",
+    "static/media/blue_logo.png": "/static/media/blue_logo.828e70e61dd4f1d1262f.png",
+    "static/media/logo.png": "/static/media/logo.86794d8e140cf377d54a.png",
+    "static/media/love.png": "/static/media/love.422d6f5ce6976126faf3.png",
+    "index.html": "/index.html",
+    "main.6c7e43ad.css.map": "/static/css/main.6c7e43ad.css.map",
+    "main.addf296e.js.map": "/static/js/main.addf296e.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6c7e43ad.css",
+    "static/js/main.addf296e.js"
+  ]
+}
