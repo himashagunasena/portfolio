@@ -64,6 +64,31 @@
 .dialog-box {
   position: relative;
 }
+.dialog-project-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 12px 22px;
+  border: none;
+  border-radius: 8px;
+  background: #111;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.dialog-project-button:hover {
+  transform: translateY(-2px);
+  opacity: 0.85;
+}
+
+.dialog-project-button span {
+  font-size: 17px;
+}
 
 .image-wrapper {
   position: relative;

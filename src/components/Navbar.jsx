@@ -7,13 +7,14 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const NAV_ITEMS = [
-  { label: 'Home',        id: 'hero' },
-  { label: 'About Me',    id: 'about' },
-  { label: 'Experience',  id: 'experience' },
-  { label: 'Skills',      id: 'skills' },
-  { label: 'Portfolio',   id: 'portfolio' },
+  { label: 'Home', id: 'hero' },
+  { label: 'About Me', id: 'about' },
+  { label: 'Experience', id: 'experience' },
+  { label: 'Skills', id: 'skills' },
+  { label: 'Portfolio', id: 'portfolio' },
   { label: 'Testimonial', id: 'review' },
-  { label: 'Contact me',  id: 'contact' },
+  { label: 'Blog', id: 'blog' },
+  { label: 'Contact me', id: 'contact' },
 ];
 
 export default function Navbar({ activeSection, scrollY }) {
@@ -25,8 +26,19 @@ export default function Navbar({ activeSection, scrollY }) {
   const isScrolled = scrollY > window.innerHeight * 0.85;
 
   const scrollTo = (id) => {
-    if (id === 'hero') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-    if (id === 'about') { window.scrollTo({ top: window.innerHeight * 1.0, behavior: 'smooth' }); return; }
+    if (id === 'blog') {
+      alert('Blog is coming soon. Stay tuned!');
+      setMenuOpen(false);
+      return;
+    }
+    if (id === 'hero') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    if (id === 'about') {
+      window.scrollTo({ top: window.innerHeight * 1.0, behavior: 'smooth' });
+      return;
+    }
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
     setMenuOpen(false);
@@ -60,7 +72,9 @@ export default function Navbar({ activeSection, scrollY }) {
   };
 
   useEffect(() => {
-    const handleKey = (e) => { if (e.key === 'Escape') setCvDialogOpen(false); };
+    const handleKey = (e) => {
+      if (e.key === 'Escape') setCvDialogOpen(false);
+    };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, []);
@@ -123,26 +137,32 @@ export default function Navbar({ activeSection, scrollY }) {
               <div className="cv-options">
                 <button
                   className="cv-option-btn"
-                  onClick={() => cvData.mobile && downloadCV(cvData.mobile, 'Himasha Gunasena-Mobile Engineer.pdf')}
+                  onClick={() =>
+                    cvData.mobile &&
+                    downloadCV(cvData.mobile, 'Himasha Gunasena-Mobile Engineer.pdf')
+                  }
                   disabled={!cvData.mobile}
                 >
                   <div className="cv-option-info">
                     <span className="cv-option-title">Mobile Development</span>
                     <span className="cv-option-desc">Flutter · React Native · Android</span>
                   </div>
-                   <img src={downloadIcon} alt="download icon" className="cv-option-arrow" />
+                  <img src={downloadIcon} alt="download icon" className="cv-option-arrow" />
                 </button>
 
                 <button
                   className="cv-option-btn"
-                  onClick={() => cvData.uiux && downloadCV(cvData.uiux, 'Himasha Gunasena-UIUX Designer.pdf')}
+                  onClick={() =>
+                    cvData.uiux &&
+                    downloadCV(cvData.uiux, 'Himasha Gunasena-UIUX Designer.pdf')
+                  }
                   disabled={!cvData.uiux}
                 >
                   <div className="cv-option-info">
                     <span className="cv-option-title">UI/UX Design</span>
                     <span className="cv-option-desc">Figma · Branding · Illustration</span>
                   </div>
-                        <img src={downloadIcon} alt="download icon" className="cv-option-arrow" />
+                  <img src={downloadIcon} alt="download icon" className="cv-option-arrow" />
                 </button>
               </div>
             )}
